@@ -169,7 +169,7 @@ strategy.
 
 ```jinja
 {# delegate to lifetime strategy #}
-{% cache 'v1/summary' {gen: item} %}
+{% cache 'v1/summary' {time: 300} %}
     {# heavy lifting template stuff here, include/render other partials etc #}
 {% endcache %}
 
