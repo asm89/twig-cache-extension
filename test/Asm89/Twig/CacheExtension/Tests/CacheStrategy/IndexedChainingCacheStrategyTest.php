@@ -50,7 +50,7 @@ class IndexedChainingCacheStrategyTest extends \PHPUnit_Framework_TestCase
      * @expectedException RuntimeException
      * @expectedExceptionMessage No strategy configured with key "unknown"
      */
-    public function testGenerateKeyThrowsExceptionOnUnkownKey()
+    public function testGenerateKeyThrowsExceptionOnUnknownKey()
     {
         $strategy = $this->createCacheStrategy();
 
