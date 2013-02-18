@@ -1,7 +1,7 @@
 Twig cache extension
 ====================
 
-The missing cache extension for Twig. The extension allows for caching parts of
+The missing cache extension for Twig. The extension allows for caching rendered parts of
 templates using several cache strategies.
 
 [![Build Status](https://secure.travis-ci.org/asm89/twig-cache-extension.png?branch=master)](http://travis-ci.org/asm89/twig-cache-extension)
