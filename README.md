@@ -34,7 +34,7 @@ use Asm89\Twig\CacheExtension\CacheStrategy\LifetimeCacheStrategy;
 use Asm89\Twig\CacheExtension\Extension as CacheExtension;
 
 $cacheProvider  = new DoctrineCacheAdapter(new ArrayCache());
-$cacheStrategy  = new LifetimeCacheStrategy($cache);
+$cacheStrategy  = new LifetimeCacheStrategy($cacheProvider);
 $cacheExtension = new CacheExtension($cacheStrategy);
 
 $twig->addExtension($cacheExtension);
