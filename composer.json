@@ -1,7 +1,7 @@
 {
     "name": "asm89/twig-cache-extension",
     "description": "Caching template fragments with Twig.",
-    "keywords": ["twig", "cache"],
+    "keywords": ["twig", "cache", "extension"],
     "homepage": "https://github.com/asm89/twig-cache-extension",
     "type": "library",
     "license": "MIT",
@@ -16,9 +16,14 @@
         "twig/twig": "1.*"
     },
     "require-dev": {
-        "doctrine/common": ">=2.1,<2.5-dev"
+        "doctrine/cache": "1.*"
     },
     "autoload": {
         "psr-0": { "Asm89\\Twig\\CacheExtension\\": "lib/" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.1-dev"
+        }
     }
 }
