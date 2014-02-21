@@ -103,7 +103,7 @@ class MyKeyGenerator implements KeyGeneratorInterface
 {
     public function generateKey($value)
     {
-        return get_class($value) . '_' . $value->getId() . '_' . $value->getUpdatedAt();
+        return get_class($value) . '_' . $value->getId() . '_' . $value->getUpdatedAt()->getTimestamp();
     }
 
 }
