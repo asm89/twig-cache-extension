@@ -44,7 +44,8 @@ class Cache extends \Twig_TokenParser
         $lineno = $token->getLine();
         $stream = $this->parser->getStream();
 
-        $annotation = $stream->expect(Twig_Token::STRING_TYPE)->getValue();
+        $annotation = $this->parser->getExpressionParser()->parseExpression();
+
         $key = $this->parser->getExpressionParser()->parseExpression();
 
         $stream->expect(Twig_Token::BLOCK_END_TYPE);

@@ -142,15 +142,12 @@ class FunctionalExtensionTest extends \PHPUnit_Framework_TestCase
         $rendered = $twig->render('ics_no_key.twig', array('value' => $this->getValue('asm89', 1)));
     }
 
-    /**
-     * @expectedException Twig_Error_Syntax
-     * @expectedExceptionMessage Unexpected token "name" of value "annotation" ("string" expected) in "annotation_not_string.twig"
-     */
-    public function testAnnotationMustBeString()
+    public function testAnnotationExpression()
     {
-        $twig = $this->createTwig();
+        $twig = $this->createTwig('indexed');
 
-        $rendered = $twig->render('annotation_not_string.twig', array('value' => $this->getValue('asm89', 1)));
+        $rendered = $twig->render('annotation_expression.twig', array('value' => $this->getValue('asm89', 1), 'version' => 1));
+        $this->assertEquals('Hello asm89!Hello asm89!', $rendered);
     }
 }
 
