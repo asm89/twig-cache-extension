@@ -13,6 +13,11 @@ namespace Asm89\Twig\CacheExtension\CacheStrategy;
 
 use Asm89\Twig\CacheExtension\CacheProviderInterface;
 use Asm89\Twig\CacheExtension\CacheStrategyInterface;
+use Asm89\Twig\CacheExtension\Event\BlockFetchEvent;
+use Asm89\Twig\CacheExtension\Event\BlockSaveEvent;
+use Asm89\Twig\CacheExtension\Events;
+use Asm89\Twig\CacheExtension\InvalidatableCacheStrategyInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Strategy for caching with a pre-defined lifetime.
@@ -22,9 +27,10 @@ use Asm89\Twig\CacheExtension\CacheStrategyInterface;
  *
  * @author Alexander <iam.asm89@gmail.com>
  */
-class LifetimeCacheStrategy implements CacheStrategyInterface
+class LifetimeCacheStrategy implements CacheStrategyInterface, InvalidatableCacheStrategyInterface
 {
     private $cache;
+    private $dispatcher;
 
     /**
      * @param CacheProviderInterface $cache
@@ -35,11 +41,27 @@ class LifetimeCacheStrategy implements CacheStrategyInterface
     }
 
     /**
+     * Set the event dispatcher.
+     *
+     * @param EventDispatcherInterface $dispatcher
+     */
+    public function setEventDispatcher(EventDispatcherInterface $dispatcher)
+    {
+        $this->dispatcher = $dispatcher;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function fetchBlock($key)
     {
-        return $this->cache->fetch($key['key']);
+        $block = $this->cache->fetch($key['key']);
+
+        if ($this->dispatcher && $block !== false) {
+            $this->dispatcher->dispatch(Events::BLOCK_FETCH, new BlockFetchEvent($key['key'], $block));
+        }
+
+        return $block;
     }
 
     /**
@@ -63,6 +85,20 @@ class LifetimeCacheStrategy implements CacheStrategyInterface
      */
     public function saveBlock($key, $block)
     {
-        return $this->cache->save($key['key'], $block, $key['lifetime']);
+        $saved = $this->cache->save($key['key'], $block, $key['lifetime']);
+
+        if ($this->dispatcher && $saved) {
+            $this->dispatcher->dispatch(Events::BLOCK_SAVE, new BlockSaveEvent($key['key'], $block));
+        }
+
+        return $saved;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function invalidateBlock($key)
+    {
+        return $this->cache->invalidate($key['key']);
     }
 }
