@@ -12,6 +12,7 @@
 namespace Asm89\Twig\CacheExtension\CacheProvider;
 
 use Asm89\Twig\CacheExtension\CacheProviderInterface;
+use Asm89\Twig\CacheExtension\InvalidatableCacheProviderInterface;
 use Doctrine\Common\Cache\Cache;
 
 /**
@@ -19,7 +20,7 @@ use Doctrine\Common\Cache\Cache;
  *
  * @author Alexander <iam.asm89@gmail.com>
  */
-class DoctrineCacheAdapter implements CacheProviderInterface
+class DoctrineCacheAdapter implements CacheProviderInterface, InvalidatableCacheProviderInterface
 {
     private $cache;
 
@@ -45,5 +46,13 @@ class DoctrineCacheAdapter implements CacheProviderInterface
     public function save($key, $value, $lifetime = 0)
     {
         return $this->cache->save($key, $value, $lifetime);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function invalidate($key)
+    {
+        return $this->cache->delete($key);
     }
 }

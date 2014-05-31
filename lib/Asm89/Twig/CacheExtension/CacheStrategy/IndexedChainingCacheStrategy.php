@@ -12,6 +12,11 @@
 namespace Asm89\Twig\CacheExtension\CacheStrategy;
 
 use Asm89\Twig\CacheExtension\CacheStrategyInterface;
+use Asm89\Twig\CacheExtension\Event\BlockFetchEvent;
+use Asm89\Twig\CacheExtension\Event\BlockSaveEvent;
+use Asm89\Twig\CacheExtension\Events;
+use Asm89\Twig\CacheExtension\InvalidatableCacheStrategyInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Combines several configured cache strategies.
@@ -22,9 +27,10 @@ use Asm89\Twig\CacheExtension\CacheStrategyInterface;
  *
  * @author Alexander <iam.asm89@gmail.com>
  */
-class IndexedChainingCacheStrategy implements CacheStrategyInterface
+class IndexedChainingCacheStrategy implements CacheStrategyInterface, InvalidatableCacheStrategyInterface
 {
     private $strategies;
+    private $dispatcher;
 
     /**
      * @param array $strategies
@@ -35,11 +41,27 @@ class IndexedChainingCacheStrategy implements CacheStrategyInterface
     }
 
     /**
+     * Set the event dispatcher.
+     *
+     * @param EventDispatcherInterface $dispatcher
+     */
+    public function setEventDispatcher(EventDispatcherInterface $dispatcher)
+    {
+        $this->dispatcher = $dispatcher;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function fetchBlock($key)
     {
-        return $this->strategies[$key['strategyKey']]->fetchBlock($key['key']);
+        $block = $this->strategies[$key['strategyKey']]->fetchBlock($key['key']);
+
+        if ($this->dispatcher && $block !== false) {
+            $this->dispatcher->dispatch(Events::BLOCK_FETCH, new BlockFetchEvent($key['key'], $block));
+        }
+
+        return $block;
     }
 
     /**
@@ -70,6 +92,20 @@ class IndexedChainingCacheStrategy implements CacheStrategyInterface
      */
     public function saveBlock($key, $block)
     {
-        return $this->strategies[$key['strategyKey']]->saveBlock($key['key'], $block);
+        $saved = $this->strategies[$key['strategyKey']]->saveBlock($key['key'], $block);
+
+        if ($this->dispatcher && $saved) {
+            $this->dispatcher->dispatch(Events::BLOCK_SAVE, new BlockSaveEvent($key['key'], $block));
+        }
+
+        return $saved;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function invalidateBlock($key)
+    {
+        return $this->strategies[$key['strategyKey']]->invalidateBlock($key['key']);
     }
 }
