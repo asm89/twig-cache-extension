@@ -21,15 +21,15 @@ class CacheNode extends \Twig_Node
     private static $cacheCount = 1;
 
     /**
-     * @param string                $annotation
+     * @param \Twig_Node_Expression $annotation
      * @param \Twig_Node_Expression $keyInfo
      * @param \Twig_NodeInterface   $body
      * @param integer               $lineno
      * @param string                $tag
      */
-    public function __construct($annotation, \Twig_Node_Expression $keyInfo, \Twig_NodeInterface $body, $lineno, $tag = null)
+    public function __construct(\Twig_Node_Expression $annotation, \Twig_Node_Expression $keyInfo, \Twig_NodeInterface $body, $lineno, $tag = null)
     {
-        parent::__construct(array('key_info' => $keyInfo, 'body' => $body), array('annotation' => $annotation), $lineno, $tag);
+        parent::__construct(array('key_info' => $keyInfo, 'body' => $body, 'annotation' => $annotation), array(), $lineno, $tag);
     }
 
     /**
@@ -42,7 +42,9 @@ class CacheNode extends \Twig_Node
         $compiler
             ->addDebugInfo($this)
             ->write("\$asm89CacheStrategy".$i." = \$this->getEnvironment()->getExtension('asm89_cache')->getCacheStrategy();\n")
-            ->write("\$asm89Key".$i." = \$asm89CacheStrategy".$i."->generateKey('".$this->getAttribute('annotation')."', ")
+            ->write("\$asm89Key".$i." = \$asm89CacheStrategy".$i."->generateKey(")
+                ->subcompile($this->getNode('annotation'))
+                ->raw(", ")
                 ->subcompile($this->getNode('key_info'))
             ->write(");\n")
             ->write("\$asm89CacheBody".$i." = \$asm89CacheStrategy".$i."->fetchBlock(\$asm89Key".$i.");\n")
