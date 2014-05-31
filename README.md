@@ -64,6 +64,15 @@ Cache blocks can be nested:
 {% endcache %}
 ```
 
+The annotation can also be an expression:
+
+```jinja
+{% set version = 42 %}
+{% cache 'hello_v' ~ version 900 %}
+    Hello {{ name }}!
+{% endcache %}
+```
+
 ## Cache strategies
 
 The extension ships with a few cache strategies out of the box. Setup and usage
