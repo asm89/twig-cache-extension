@@ -61,7 +61,6 @@ class FunctionalExtensionTest extends \PHPUnit_Framework_TestCase
         $loader = new Twig_Loader_Filesystem(__DIR__ . '/fixtures/');
         $twig = new Twig_Environment($loader);
 
-        $cache = $this->createCacheProvider();
         $cacheExtension = new Extension($this->createCacheStrategy($cacheStrategyName));
 
         $twig->addExtension($cacheExtension);
@@ -139,7 +138,7 @@ class FunctionalExtensionTest extends \PHPUnit_Framework_TestCase
     {
         $twig = $this->createTwig('indexed');
 
-        $rendered = $twig->render('ics_no_key.twig', array('value' => $this->getValue('asm89', 1)));
+        $twig->render('ics_no_key.twig', array('value' => $this->getValue('asm89', 1)));
     }
 
     public function testAnnotationExpression()
@@ -162,6 +161,7 @@ class KeyGenerator implements KeyGeneratorInterface
 
 class Value
 {
+    private $value;
     private $updatedAt;
 
     public function __construct($value, $updatedAt)
