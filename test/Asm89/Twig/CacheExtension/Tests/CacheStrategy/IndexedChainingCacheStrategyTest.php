@@ -47,13 +47,21 @@ class IndexedChainingCacheStrategyTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException RuntimeException
+     * @expectedException \Asm89\Twig\CacheExtension\Exception\NonExistingStrategyKeyException
+     */
+    public function testGenerateKeyThrowsExceptionOnMissingKey()
+    {
+        $strategy = $this->createCacheStrategy();
+        $strategy->generateKey('v42', 'proxied_value');
+    }
+
+    /**
+     * @expectedException \Asm89\Twig\CacheExtension\Exception\NonExistingStrategyException
      * @expectedExceptionMessage No strategy configured with key "unknown"
      */
     public function testGenerateKeyThrowsExceptionOnUnknownKey()
     {
         $strategy = $this->createCacheStrategy();
-
         $strategy->generateKey('v42', array('unknown' => 'proxied_value'));
     }
 

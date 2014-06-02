@@ -23,7 +23,7 @@ interface CacheStrategyInterface
      *
      * @param mixed $key
      *
-     * @return string
+     * @return mixed
      */
     public function fetchBlock($key);
 
@@ -42,6 +42,8 @@ interface CacheStrategyInterface
      *
      * @param mixed  $key
      * @param string $block
+     *
+     * @return mixed
      */
     public function saveBlock($key, $block);
 }

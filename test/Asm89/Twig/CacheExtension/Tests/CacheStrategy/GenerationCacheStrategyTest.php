@@ -37,7 +37,7 @@ class GenerationalCacheStrategyTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException RuntimeException
+     * @expectedException \Asm89\Twig\CacheExtension\Exception\InvalidCacheKeyException
      */
     public function testGenerationKeyThrowsExceptionWhenKeyGeneratorReturnsNull()
     {
