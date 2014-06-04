@@ -16,7 +16,9 @@
         "twig/twig": "~1.0"
     },
     "require-dev": {
-        "doctrine/cache": "~1.0"
+        "doctrine/cache":           "~1.0",
+        "symfony/event-dispatcher": "~2.0",
+        "phpunit/phpunit":          "~3.7"
     },
     "autoload": {
         "psr-4": {

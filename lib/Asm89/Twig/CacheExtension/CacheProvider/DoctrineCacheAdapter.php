@@ -12,6 +12,8 @@
 namespace Asm89\Twig\CacheExtension\CacheProvider;
 
 use Asm89\Twig\CacheExtension\CacheProviderInterface;
+use Asm89\Twig\CacheExtension\Event\BlockEvent;
+use Asm89\Twig\CacheExtension\Events;
 use Doctrine\Common\Cache\Cache;
 
 /**
@@ -19,7 +21,7 @@ use Doctrine\Common\Cache\Cache;
  *
  * @author Alexander <iam.asm89@gmail.com>
  */
-class DoctrineCacheAdapter implements CacheProviderInterface
+class DoctrineCacheAdapter extends AbstractCacheAdapter implements CacheProviderInterface
 {
     private $cache;
 
@@ -36,7 +38,13 @@ class DoctrineCacheAdapter implements CacheProviderInterface
      */
     public function fetch($key)
     {
-        return $this->cache->fetch($key);
+        $block = $this->cache->fetch($key);
+
+        if (null !== $this->dispatcher) {
+            $this->dispatch($block !== false ? Events::BLOCK_FETCH : Events::BLOCK_MISSED, new BlockEvent($key, $block));
+        }
+
+        return $block;
     }
 
     /**
@@ -44,6 +52,12 @@ class DoctrineCacheAdapter implements CacheProviderInterface
      */
     public function save($key, $value, $lifetime = 0)
     {
-        return $this->cache->save($key, $value, $lifetime);
+        $saved = $this->cache->save($key, $value, $lifetime);
+
+        if (null !== $this->dispatcher) {
+            $this->dispatch($saved ? Events::BLOCK_SAVE : Events::BLOCK_ERROR, new BlockEvent($key, $value));
+        }
+
+        return $saved;
     }
 }
