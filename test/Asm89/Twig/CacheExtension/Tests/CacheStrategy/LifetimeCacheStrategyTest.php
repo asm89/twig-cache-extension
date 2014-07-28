@@ -44,7 +44,7 @@ class LifetimeCacheStrategyTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider getInvalidLifetimeValues
-     * @expectedException RuntimeException
+     * @expectedException \Asm89\Twig\CacheExtension\Exception\InvalidCacheLifetimeException
      */
     public function testGenerateKeyThrowsExceptionWhenNoLifetimeProvided($value)
     {

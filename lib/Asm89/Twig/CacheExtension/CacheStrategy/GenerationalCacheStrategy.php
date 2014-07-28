@@ -13,6 +13,7 @@ namespace Asm89\Twig\CacheExtension\CacheStrategy;
 
 use Asm89\Twig\CacheExtension\CacheProviderInterface;
 use Asm89\Twig\CacheExtension\CacheStrategyInterface;
+use Asm89\Twig\CacheExtension\Exception\InvalidCacheKeyException;
 
 /**
  * Strategy for generational caching.
@@ -62,8 +63,7 @@ class GenerationalCacheStrategy implements CacheStrategyInterface
         $key = $this->keyGenerator->generateKey($value);
 
         if (null === $key) {
-            // todo: more specific exception
-            throw new \RuntimeException('Key generator did not return a key.');
+            throw new InvalidCacheKeyException();
         }
 
         return $annotation . '__GCS__' . $key;

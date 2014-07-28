@@ -13,6 +13,7 @@ namespace Asm89\Twig\CacheExtension\CacheStrategy;
 
 use Asm89\Twig\CacheExtension\CacheProviderInterface;
 use Asm89\Twig\CacheExtension\CacheStrategyInterface;
+use Asm89\Twig\CacheExtension\Exception\InvalidCacheLifetimeException;
 
 /**
  * Strategy for caching with a pre-defined lifetime.
@@ -47,14 +48,13 @@ class LifetimeCacheStrategy implements CacheStrategyInterface
      */
     public function generateKey($annotation, $value)
     {
-        if (! is_numeric($value)) {
-            //todo: specialized exception
-            throw new \RuntimeException('Value is not a valid lifetime.');
+        if (!is_numeric($value)) {
+            throw new InvalidCacheLifetimeException($value);
         }
 
         return array(
             'lifetime' => $value,
-            'key' => '__LCS__' . $annotation,
+            'key'      => '__LCS__' . $annotation,
         );
     }
 

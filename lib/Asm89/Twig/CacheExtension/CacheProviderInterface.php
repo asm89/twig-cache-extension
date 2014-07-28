@@ -29,6 +29,8 @@ interface CacheProviderInterface
      * @param string  $key
      * @param string  $value
      * @param integer $lifetime
+     *
+     * @return boolean
      */
     public function save($key, $value, $lifetime = 0);
 }
