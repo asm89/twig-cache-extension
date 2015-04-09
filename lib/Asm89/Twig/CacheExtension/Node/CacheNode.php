@@ -19,6 +19,7 @@ namespace Asm89\Twig\CacheExtension\Node;
 class CacheNode extends \Twig_Node
 {
     private static $cacheCount = 1;
+    private $hash = '';
 
     /**
      * @param \Twig_Node_Expression $annotation
@@ -32,12 +33,32 @@ class CacheNode extends \Twig_Node
         parent::__construct(array('key_info' => $keyInfo, 'body' => $body, 'annotation' => $annotation), array(), $lineno, $tag);
     }
 
+    private function hashIncludeNode($node, $env)
+    {
+        if ($node === null) {
+            return;
+        }
+
+        if ($node->getNodeTag() === 'include') {
+            $template = $env->getLoader()->getSource($node->getNode('expr')->getAttribute('value'));
+            $this->hash = sha1($this->hash.$template);
+        }
+
+        foreach ($node as $n) {
+            $this->hashIncludeNode($n, $env);
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
     public function compile(\Twig_Compiler $compiler)
     {
         $i = self::$cacheCount++;
+
+        $this->hash = '';
+        $this->hashIncludeNode($this->getNode('body'), $compiler->getEnvironment());
+        $hash = sha1($this->hash.$this->getNode('body'));
 
         $compiler
             ->addDebugInfo($this)
@@ -47,6 +68,15 @@ class CacheNode extends \Twig_Node
                 ->raw(", ")
                 ->subcompile($this->getNode('key_info'))
             ->write(");\n")
+            ->write("if (isset(\$asm89Key".$i."['key']['key'])) {\n")
+                ->indent()
+                    ->write("\$asm89Key".$i."['key']['key'] .= '/h/".$hash."';\n")
+                ->outdent()
+            ->write("} else {\n")
+                ->indent()
+                    ->write("\$asm89Key".$i."['key'] .= '/h/".$hash."';\n")
+                ->outdent()
+            ->write("}\n")
             ->write("\$asm89CacheBody".$i." = \$asm89CacheStrategy".$i."->fetchBlock(\$asm89Key".$i.");\n")
             ->write("if (\$asm89CacheBody".$i." === false) {\n")
             ->indent()
