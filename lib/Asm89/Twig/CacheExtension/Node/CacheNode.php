@@ -72,7 +72,7 @@ class CacheNode extends \Twig_Node
                 ->indent()
                     ->write("\$asm89Key".$i."['key']['key'] .= '/".$hash."';\n")
                 ->outdent()
-            ->write("} else {\n")
+            ->write("} elseif (isset(\$asm89Key".$i."['key'])) {\n")
                 ->indent()
                     ->write("\$asm89Key".$i."['key'] .= '/".$hash."';\n")
                 ->outdent()
