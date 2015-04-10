@@ -73,7 +73,6 @@ class CacheNode extends \Twig_Node
         }
 
         $compiler
-            // ->write("\$asm89TemplateDependencies$i = ".var_export($dependencies, true).";\n")
             ->write("\$asm89CacheStrategy".$i." = \$this->getEnvironment()->getExtension('asm89_cache')->getCacheStrategy();\n")
             ->write("\$asm89Key".$i." = \$asm89CacheStrategy".$i."->generateKey(")
                 ->subcompile($this->getNode('annotation'))
