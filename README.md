@@ -13,7 +13,7 @@ The extension is installable via composer:
 ```json
 {
     "require": {
-        "asm89/twig-cache-extension": "~0.1"
+        "asm89/twig-cache-extension": "~1.0"
     }
 }
 ```
