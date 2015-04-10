@@ -19,7 +19,7 @@ namespace Asm89\Twig\CacheExtension\Node;
 class CacheNode extends \Twig_Node
 {
     private static $cacheCount = 1;
-    private $hash = '';
+    private $blockDependencies = [];
 
     /**
      * @param \Twig_Node_Expression $annotation
@@ -33,20 +33,21 @@ class CacheNode extends \Twig_Node
         parent::__construct(array('key_info' => $keyInfo, 'body' => $body, 'annotation' => $annotation), array(), $lineno, $tag);
     }
 
-    private function hashIncludeNode($node, $env)
+    private function findBlockDependencies(\Twig_NodeInterface $node = null)
     {
         if ($node === null) {
             return;
         }
 
         if ($node->getNodeTag() === 'include') {
-            $template = $env->getLoader()->getSource($node->getNode('expr')->getAttribute('value'));
-            $this->hash = sha1($this->hash.$template);
+            $this->blockDependencies[] = $node;
         }
 
         foreach ($node as $n) {
-            $this->hashIncludeNode($n, $env);
+            $this->findBlockDependencies($n);
         }
+
+        return $this->blockDependencies;
     }
 
     /**
@@ -56,12 +57,23 @@ class CacheNode extends \Twig_Node
     {
         $i = self::$cacheCount++;
 
-        $this->hash = '';
-        $this->hashIncludeNode($this->getNode('body'), $compiler->getEnvironment());
-        $hash = sha1($this->hash.$this->getNode('body'));
+        $this->blockDependencies = [];
+        $this->findBlockDependencies($this->getNode('body'));
+        $blockDigest = sha1((string) $this->getNode('body'));
+
+        $compiler->addDebugInfo($this);
+        $compiler->write("\$asm89Digest{$i} = '';\n");
+
+        foreach ($this->blockDependencies as $node) {
+            $compiler
+                ->write("\$asm89Digest{$i} .= sha1_file(\$this->getEnvironment()->getLoader()->getSource(")
+                    ->subcompile($node->getNode('expr'))
+                ->write("));\n")
+            ;
+        }
 
         $compiler
-            ->addDebugInfo($this)
+            // ->write("\$asm89TemplateDependencies$i = ".var_export($dependencies, true).";\n")
             ->write("\$asm89CacheStrategy".$i." = \$this->getEnvironment()->getExtension('asm89_cache')->getCacheStrategy();\n")
             ->write("\$asm89Key".$i." = \$asm89CacheStrategy".$i."->generateKey(")
                 ->subcompile($this->getNode('annotation'))
@@ -70,11 +82,11 @@ class CacheNode extends \Twig_Node
             ->write(");\n")
             ->write("if (isset(\$asm89Key".$i."['key']['key'])) {\n")
                 ->indent()
-                    ->write("\$asm89Key".$i."['key']['key'] .= '/".$hash."';\n")
+                    ->write("\$asm89Key".$i."['key']['key'] .= '/'.sha1('".$blockDigest."'.\$asm89Digest{$i});\n")
                 ->outdent()
             ->write("} elseif (isset(\$asm89Key".$i."['key'])) {\n")
                 ->indent()
-                    ->write("\$asm89Key".$i."['key'] .= '/".$hash."';\n")
+                    ->write("\$asm89Key".$i."['key'] .= '/'.sha1('".$blockDigest."'.\$asm89Digest{$i});\n")
                 ->outdent()
             ->write("}\n")
             ->write("\$asm89CacheBody".$i." = \$asm89CacheStrategy".$i."->fetchBlock(\$asm89Key".$i.");\n")
