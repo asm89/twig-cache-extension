@@ -39,7 +39,7 @@ class CacheNode extends \Twig_Node
             return;
         }
 
-        if ($node->getNodeTag() === 'include') {
+        if ($node->getNodeTag() === 'include' && $node->getNode('expr') instanceof \Twig_Node_Expression_Constant) {
             $this->blockDependencies[] = $node;
         }
 
@@ -60,16 +60,22 @@ class CacheNode extends \Twig_Node
         $this->blockDependencies = [];
         $this->findBlockDependencies($this->getNode('body'));
         $blockDigest = sha1((string) $this->getNode('body'));
+        $loader = $compiler->getEnvironment()->getLoader();
 
         $compiler->addDebugInfo($this);
+
         $compiler->write("\$asm89Digest{$i} = '';\n");
 
         foreach ($this->blockDependencies as $node) {
-            $compiler
-                ->write("\$asm89Digest{$i} .= sha1_file(\$this->getEnvironment()->getLoader()->getSource(")
-                    ->subcompile($node->getNode('expr'))
-                ->write("));\n")
-            ;
+            if ($compiler->getEnvironment()->isDebug() || $compiler->getEnvironment()->isAutoReload()) {
+                $compiler
+                    ->write("\$asm89Digest{$i} .= sha1(\$this->getEnvironment()->getLoader()->getSource(")
+                        ->subcompile($node->getNode('expr'))
+                    ->write("));\n")
+                ;
+            } else {
+                $blockDigest .= sha1($loader->getSource($node->getNode('expr')->getAttribute('value')));
+            }
         }
 
         $compiler
