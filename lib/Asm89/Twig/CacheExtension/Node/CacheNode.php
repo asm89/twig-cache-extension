@@ -19,6 +19,7 @@ namespace Asm89\Twig\CacheExtension\Node;
 class CacheNode extends \Twig_Node
 {
     private static $cacheCount = 1;
+    private $blockDependencies = [];
 
     /**
      * @param \Twig_Node_Expression $annotation
@@ -32,6 +33,23 @@ class CacheNode extends \Twig_Node
         parent::__construct(array('key_info' => $keyInfo, 'body' => $body, 'annotation' => $annotation), array(), $lineno, $tag);
     }
 
+    private function findBlockDependencies(\Twig_NodeInterface $node = null)
+    {
+        if ($node === null) {
+            return;
+        }
+
+        if ($node->getNodeTag() === 'include' && $node->getNode('expr') instanceof \Twig_Node_Expression_Constant) {
+            $this->blockDependencies[] = $node;
+        }
+
+        foreach ($node as $n) {
+            $this->findBlockDependencies($n);
+        }
+
+        return $this->blockDependencies;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -39,14 +57,43 @@ class CacheNode extends \Twig_Node
     {
         $i = self::$cacheCount++;
 
+        $this->blockDependencies = [];
+        $this->findBlockDependencies($this->getNode('body'));
+        $blockDigest = sha1((string) $this->getNode('body'));
+        $loader = $compiler->getEnvironment()->getLoader();
+
+        $compiler->addDebugInfo($this);
+
+        $compiler->write("\$asm89Digest{$i} = '';\n");
+
+        foreach ($this->blockDependencies as $node) {
+            if ($compiler->getEnvironment()->isDebug() || $compiler->getEnvironment()->isAutoReload()) {
+                $compiler
+                    ->write("\$asm89Digest{$i} .= sha1(\$this->getEnvironment()->getLoader()->getSource(")
+                        ->subcompile($node->getNode('expr'))
+                    ->write("));\n")
+                ;
+            } else {
+                $blockDigest .= sha1($loader->getSource($node->getNode('expr')->getAttribute('value')));
+            }
+        }
+
         $compiler
-            ->addDebugInfo($this)
             ->write("\$asm89CacheStrategy".$i." = \$this->getEnvironment()->getExtension('asm89_cache')->getCacheStrategy();\n")
             ->write("\$asm89Key".$i." = \$asm89CacheStrategy".$i."->generateKey(")
                 ->subcompile($this->getNode('annotation'))
                 ->raw(", ")
                 ->subcompile($this->getNode('key_info'))
             ->write(");\n")
+            ->write("if (isset(\$asm89Key".$i."['key']['key'])) {\n")
+                ->indent()
+                    ->write("\$asm89Key".$i."['key']['key'] .= '/'.sha1('".$blockDigest."'.\$asm89Digest{$i});\n")
+                ->outdent()
+            ->write("} elseif (isset(\$asm89Key".$i."['key'])) {\n")
+                ->indent()
+                    ->write("\$asm89Key".$i."['key'] .= '/'.sha1('".$blockDigest."'.\$asm89Digest{$i});\n")
+                ->outdent()
+            ->write("}\n")
             ->write("\$asm89CacheBody".$i." = \$asm89CacheStrategy".$i."->fetchBlock(\$asm89Key".$i.");\n")
             ->write("if (\$asm89CacheBody".$i." === false) {\n")
             ->indent()
