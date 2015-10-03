@@ -94,6 +94,10 @@ For example: entities containing a last update time, would include a timestamp
 in the key. For an interesting blog post about this type of caching see:
 http://37signals.com/svn/posts/3113-how-key-based-cache-expiration-works
 
+### Blackhole
+
+Strategy for debug/development mode. It generates always a new key, will never fetch a block and never save a block.  
+
 #### Setup
 
 In order to use the strategy you need to setup a `KeyGenerator` class that is
