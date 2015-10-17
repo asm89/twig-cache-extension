@@ -96,7 +96,11 @@ http://37signals.com/svn/posts/3113-how-key-based-cache-expiration-works
 
 ### Blackhole
 
-Strategy for debug/development mode. It generates always a new key, will never fetch a block and never save a block.  
+Strategy for development mode.
+
+In development mode it often not very useful to cache fragments. The blackhole
+strategy provides an easy way to not cache anything it all. It always generates
+a new key and does not fetch or save any fragments.
 
 #### Setup
 
