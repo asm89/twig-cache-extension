@@ -27,7 +27,7 @@ class CacheNode extends \Twig_Node
      * @param integer               $lineno
      * @param string                $tag
      */
-    public function __construct(\Twig_Node_Expression $annotation, \Twig_Node_Expression $keyInfo, \Twig_NodeInterface $body, $lineno, $tag = null)
+    public function __construct(\Twig_Node_Expression $annotation, \Twig_Node_Expression $keyInfo, \Twig_Node $body, $lineno, $tag = null)
     {
         parent::__construct(array('key_info' => $keyInfo, 'body' => $body, 'annotation' => $annotation), array(), $lineno, $tag);
     }
