@@ -40,6 +40,33 @@ $cacheExtension = new CacheExtension($cacheStrategy);
 $twig->addExtension($cacheExtension);
 ```
 
+### Want to use a PSR-6 cache pool?
+
+Instead of using the default `DoctrineCacheAdapter` the extension also has 
+a `PSR-6` compatible adapter. You need to instantiate one of the cache pool
+implementations as can be found on: http://php-cache.readthedocs.io/en/latest/
+
+Example: Making use of the `ApcuCachePool` via the `PsrCacheAdapter`:
+
+```bash
+composer require cache/apcu-adapter
+```
+
+```php
+<?php
+
+use Asm89\Twig\CacheExtension\CacheProvider\PsrCacheAdapter;
+use Asm89\Twig\CacheExtension\CacheStrategy\LifetimeCacheStrategy;
+use Asm89\Twig\CacheExtension\Extension as CacheExtension;
+use Cache\Adapter\Apcu\ApcuCachePool();
+
+$cacheProvider  = new PsrCacheAdapter(new ApcuCachePool());
+$cacheStrategy  = new LifetimeCacheStrategy($cacheProvider);
+$cacheExtension = new CacheExtension($cacheStrategy);
+
+$twig->addExtension($cacheExtension);
+```
+
 ### Usage
 
 To cache a part of a template in Twig surround the code with a `cache` block.
