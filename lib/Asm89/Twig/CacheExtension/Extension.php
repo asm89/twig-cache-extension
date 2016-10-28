@@ -41,7 +41,7 @@ class Extension extends \Twig_Extension
      */
     public function getName()
     {
-        return 'asm89_cache';
+        return Extension::class;
     }
 
     /**
