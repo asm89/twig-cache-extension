@@ -27,12 +27,12 @@
     },
     "autoload": {
         "psr-4": {
-            "": "lib/"
+            "Asm89\\Twig\\": "lib/Asm89/Twig/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "": "test/"
+            "Asm89\\Twig\\CacheExtension\\Tests\\": "test/"
         }
     },
     "extra": {
