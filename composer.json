@@ -32,7 +32,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Asm89\\Twig\\CacheExtension\\Tests\\": "test/"
+            "Asm89\\": "test/"
         }
     },
     "extra": {
