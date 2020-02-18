@@ -27,7 +27,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Asm89\\Twig\\": "lib/Asm89/Twig/"
+            "Asm89\\": "lib/Asm89/"
         }
     },
     "autoload-dev": {
