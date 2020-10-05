@@ -1,6 +1,9 @@
 Twig cache extension
 ====================
 
+**This extension moved to the Twig organization. Check out the repository over
+there instead: https://github.com/twigphp/twig-cache-extension.**
+
 The missing cache extension for Twig. The extension allows for caching rendered parts of
 templates using several cache strategies.
 
