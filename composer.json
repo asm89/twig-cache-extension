@@ -23,7 +23,8 @@
         "test": "phpunit"
     },
     "suggest": {
-        "psr/cache-implementation": "To make use of PSR-6 cache implementation via PsrCacheAdapter."
+        "psr/cache-implementation": "To make use of PSR-6 cache implementation via PsrCacheAdapter.",
+        "psr/simple-cache-implementation": "To make use of PSR-16 cache implementation via PsrSimpleCacheAdapter."
     },
     "autoload": {
         "psr-4": {
